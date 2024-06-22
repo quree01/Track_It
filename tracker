@@ -1,0 +1,82 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+def collect_expense_data():
+    print("\n===== Add Expense =====")
+    date = input("Enter the date (YYYY-MM-DD): ")
+    category = input("Enter expense category: ")
+    amount = float(input("Enter expense amount in INR: "))  # Amount in INR
+    return {'Date': date, 'Category': category, 'Amount': amount}
+
+def add_expense(expenses, expense):
+    return pd.concat([expenses, pd.DataFrame([expense])], ignore_index=True)
+
+def initialize_expense_tracker():
+    print("Welcome to Expense Tracker!")
+    print("Let's start tracking your expenses.")
+    return pd.DataFrame(columns=['Date', 'Category', 'Amount'])
+
+def analyze_expenses(expenses):
+    total_spent = expenses['Amount'].sum()
+    category_spending = expenses.groupby('Category')['Amount'].sum()
+    return total_spent, category_spending
+
+def visualize_expenses_bar(total_spent, category_spending):
+    plt.figure(figsize=(10, 6))
+    colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99', '#c2c2f0']
+    plt.bar(category_spending.index, category_spending.values, color=colors[:len(category_spending)])
+    plt.title('Expense Distribution by Category', fontsize=16)
+    plt.xlabel('Category', fontsize=14)
+    plt.ylabel('Amount (INR)', fontsize=14)  # Updated to INR
+    plt.xticks(rotation=45, fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.gca().set_facecolor('#f0f0f0')  # Set background color to light gray
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+
+def visualize_expenses_pie(category_spending):
+    plt.figure(figsize=(8, 8))
+    colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99', '#c2c2f0']
+    explode = (0.1,) + (0,) * (len(category_spending) - 1)  # explode the 1st slice
+    plt.pie(category_spending, labels=category_spending.index, autopct='%1.1f%%', colors=colors, startangle=140, explode=explode)
+    plt.title('Expense Distribution by Category', fontsize=16)
+    plt.gca().set_facecolor('#f0f0f0')  # Set background color to light gray
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.tight_layout()
+
+
+def main():
+    expenses = initialize_expense_tracker()
+    while True:
+        print("\n===== Expense Tracker Menu =====")
+        print("1. Add Expense")
+        print("2. View Expenses (Bar Chart)")
+        print("3. View Expenses (Pie Chart)")
+        print("4. View Total Expenses")
+        print("5. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            expense = collect_expense_data()
+            expenses = add_expense(expenses, expense)
+            print("\nExpense added successfully!")
+        elif choice == '2':
+            total_spent, category_spending = analyze_expenses(expenses)
+            visualize_expenses_bar(total_spent, category_spending)
+            plt.show()  # Display the bar chart
+        elif choice == '3':
+            total_spent, category_spending = analyze_expenses(expenses)
+            visualize_expenses_pie(category_spending)
+            plt.show()  # Display the pie chart
+        elif choice == '4':
+            total_spent = np.sum(expenses['Amount'])  # Using NumPy for total sum
+            print(f"\nTotal expenses: {total_spent:.2f} INR")
+        elif choice == '5':
+            print("\nExiting Expense Tracker. Goodbye!")
+            break
+        else:
+            print("\nInvalid choice. Please try again.")
+
+if _name_ == "_main_":
+    main()
